@@ -1,33 +1,25 @@
 // Compiler and functions for the MUS Language.
 
 var endTime = function(t, expr){
-    if(expr.tag === 'note' || expr.tag === 'rest'){
+    if(expr.tag === 'note' || expr.tag === 'rest')
         return t + expr.dur;
-    }
-    if(expr.tag === 'seq'){
+    if(expr.tag === 'seq')
         return t + endTime(0, expr.left) + endTime(0, expr.right);
-    }
-    if(expr.tag === 'par'){
+    if(expr.tag === 'par')
         return Math.max(endTime(t, expr.left), endTime(t, expr.right));
-    }
-    if(expr.tag === 'repeat'){
+    if(expr.tag === 'repeat')
         return t + endTime(0, expr.section)*expr.count;
-    }
 };
 
 var compileT = function(t, expr){
-    if(expr.tag === 'note'){
+    if(expr.tag === 'note')
         return [{tag:'note', pitch: convertPitch(expr.pitch), start: t, dur: expr.dur}];
-    }
-    if(expr.tag === 'rest'){
+    if(expr.tag === 'rest')
         return [{tag:'rest', start: t, dur: expr.dur}];
-    }
-    if(expr.tag === 'seq'){
+    if(expr.tag === 'seq')
         return compileT(t, expr.left).concat(compileT(endTime(t,expr.left),expr.right));
-    }
-    if(expr.tag === 'par'){
+    if(expr.tag === 'par')
         return compileT(t, expr.left).concat(compileT(t, expr.right));
-    }
     if(expr.tag === 'repeat'){
 	var notes = [];
 	var time = endTime(0, expr.section);
