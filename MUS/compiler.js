@@ -1,4 +1,4 @@
-// Compiler and functions for the MUS Language.
+// Compiler for the MUS Language.
 
 var endTime = function(t, expr){
     if(expr.tag === 'note' || expr.tag === 'rest')
@@ -23,9 +23,8 @@ var compileT = function(t, expr){
     if(expr.tag === 'repeat'){
 	var notes = [];
 	var time = endTime(0, expr.section);
-	for(i=0;i<expr.count;i++){
+	for(i=0;i<expr.count;i++)
         	notes = notes.concat(compileT(t+time*i, expr.section));
-	}
 	return notes;
     }
 };
@@ -41,17 +40,13 @@ var compile = function(musexpr){
 
 // Testing
 var melody_mus = { tag: 'seq',
-left: 
-       { tag: 'seq',
+left:{ tag: 'seq',
          left: { tag: 'note', pitch: 'a4', dur: 250 },
          right: { tag: 'note', pitch: 'b4', dur: 250 } },
-      right:
-       { tag: 'seq',
+      right:{ tag: 'seq',
          left: { tag: 'repeat', section: { tag: 'seq',
          left: { tag: 'par', left:{tag:'note',pitch:'b5',dur:50}, right:{ tag: 'seq', left:{tag:'note',pitch:'a5',dur:20}, right:{tag:'rest',dur:20} }},
          right: { tag: 'note', pitch: 'd4', dur: 500 } }, count: 3},
          right: { tag: 'note', pitch: 'd4', dur: 500 } } };
-
-
 console.log(melody_mus);
 console.log(compile(melody_mus));
