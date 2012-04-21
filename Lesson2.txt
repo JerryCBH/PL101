@@ -1,0 +1,139 @@
+var reverse = function(expr) {
+    // Your code here
+    if(expr.tag === 'note'){
+        return expr;
+    }
+    if(expr.tag === 'seq'){
+        return {tag: 'seq', left:reverse(expr.right), right:reverse(expr.left)};
+    }
+};
+
+var endTime = function (time, expr) {
+    // your code here
+    if(expr.tag === 'note'){
+        return time + expr.dur;
+    }
+    if(expr.tag === 'seq'){
+        return endTime(time, expr.left) + endTime(time, expr.right);
+    }
+};
+
+var compile = function (musexpr) {
+    var notes = [];
+    var start = 0;
+    
+    var compileT = function(expr){
+        if(expr.tag === 'note'){
+            notes.push({tag:'note',pitch:expr.pitch, start:start, dur:expr.dur});
+            start += expr.dur;
+        }
+        if(expr.tag === 'seq'){
+            compileT(expr.left, start);
+            compileT(expr.right, start);
+        }
+    };
+
+    compileT(musexpr);
+    
+
+    return notes;
+};
+
+var playMUS = function(expr){
+    var notes = compile(expr);
+    playNOTE(notes);
+};
+
+var compile = function (musexpr) {
+    var notes = [];
+    var start = 0;
+    var par = false;
+    var max = 0;
+    
+    var compileT = function(expr){
+        if(expr.tag === 'note'){
+            notes.push({tag:'note',pitch:expr.pitch, start:start, dur:expr.dur});
+            if(!par){
+                start += expr.dur;
+            }else{
+                if(max < expr.dur)
+                    max = expr.dur;
+            }
+        }
+        if(expr.tag === 'seq'){
+            par = false;
+            start += max;
+            max = 0;
+            compileT(expr.left, start);
+            compileT(expr.right, start);
+        }
+        if(expr.tag === 'par'){
+            par = true;
+            start += max;
+            max = 0;
+            compileT(expr.left, start);
+            compileT(expr.right, start);
+        }
+    };
+
+    compileT(musexpr);
+    
+
+    return notes;
+};
+
+var endTime = function (time, expr) {
+    if(expr.tag === 'note'){
+        return time + expr.dur;
+    }
+    if(expr.tag === 'seq'){
+        return time + endTime(0, expr.left) + endTime(0, expr.right);
+    }
+    if(expr.tag === 'par'){
+        var left = endTime(0, expr.left);
+        var right = endTime(0, expr.right);
+        return (left>right)?left:right;
+    }
+};
+
+
+var compileT = function(t, expr){
+    if(expr.tag === 'note'){
+        return [{tag:'note',pitch:expr.pitch,start:t,dur:expr.dur}];
+    }
+    if(expr.tag === 'seq'){
+        return compileT(t, expr.left).concat(compileT(endTime(t, expr.left), expr.right));
+    }
+};
+
+var compile = function (musexpr) {
+    return compileT(0, musexpr);
+};
+
+var endTime = function(t, expr){
+    if(expr.tag === 'note'){
+        return t + expr.dur;
+    }
+    if(expr.tag === 'seq'){
+        return endTime(t, expr.left) + endTime(t, expr.right);
+    }
+    if(expr.tag === 'par'){
+        return Math.max(endTime(t, expr.left), endTime(t, expr.right));
+    }
+};
+
+var compileT = function(t, expr){
+    if(expr.tag === 'note'){
+        return [{tag:'note', pitch: expr.pitch, start: t, dur: expr.dur}];
+    }
+    if(expr.tag === 'seq'){
+        return compileT(t, expr.left).concat(compileT(endTime(t,expr.left),expr.right));
+    }
+    if(expr.tag === 'par'){
+        return compileT(t, expr.left).concat(compileT(t, expr.right));
+    }
+};
+ 
+var compile = function(musexpr){
+    return compileT(0, musexpr);
+};
