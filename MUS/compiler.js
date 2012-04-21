@@ -1,3 +1,5 @@
+// Compiler and functions for the MUS Language.
+
 var endTime = function(t, expr){
     if(expr.tag === 'note' || expr.tag === 'rest'){
         return t + expr.dur;
@@ -27,9 +29,9 @@ var compileT = function(t, expr){
         return compileT(t, expr.left).concat(compileT(t, expr.right));
     }
     if(expr.tag === 'repeat'){
-	var notes = compileT(t, expr.section);
+	var notes = [];
 	var time = endTime(0, expr.section);
-	for(i=1;i<expr.count;i++){
+	for(i=0;i<expr.count;i++){
         	notes = notes.concat(compileT(t+time*i, expr.section));
 	}
 	return notes;
@@ -38,9 +40,7 @@ var compileT = function(t, expr){
 
 var convertPitch = function(pitch){
     var midiArray = {c:0,d:2,e:4,f:5,g:7,a:9,b:11};
-    var letterPitch = pitch.slice(0,1);
-    var octave = pitch.slice(1);
-    return 12 + 12*octave + midiArray[letterPitch];
+    return 12 + 12*pitch.slice(1) + midiArray[pitch.slice(0,1)];
 };
  
 var compile = function(musexpr){
