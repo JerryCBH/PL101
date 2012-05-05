@@ -1,0 +1,25 @@
+/* PEG.JS Grammar for Scheem. */
+
+start
+  = expression
+
+validchar
+    = [0-9a-zA-Z_?!+\-=@#$%^&*/.]
+
+atom = chars:validchar+
+        { return chars.join(""); }
+
+space = [" "\r\n\t] / comment
+
+comment = ";;" [^\r\n]* {return '';}
+
+qoute = "'" a:bracket {return ["qoute", a];}
+
+atoms = space* a:atom space* {return a;} / qoute
+
+bracket = space* '(' a:subexpr ')' space* {return a;}
+
+subexpr = a:bracket* b:atoms+ c:subexpr* {return a.concat(b).concat(c);}
+/ bracket
+
+expression = atoms / subexpr
